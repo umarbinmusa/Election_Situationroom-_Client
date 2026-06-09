@@ -10,6 +10,7 @@ import DashboardLayout from "./components/DashboardLayout";
 import PollingUnits from "./pages/PollingUnits";
 import ElectionResults from "./pages/ElectionResults";
 import ElectionSummaryDashboard from "./Pages/ElectionSummaryDashboard";
+import CreateICTDirector from "./Pages/CreateICTDirector";
 export default function App() {
   return (
     <Routes>
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/results" element={<ElectionResults />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/summary" element={<ElectionSummaryDashboard />} />
+        <Route path="/create-director" element={<CreateICTDirector />} />
         {/* Incident Logs Dashboard */}
         <Route path="/incidents" element={<IncidentDashboard />} />
         
