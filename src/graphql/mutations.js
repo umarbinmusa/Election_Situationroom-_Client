@@ -97,3 +97,84 @@ export const SUBMIT_RESULT = gql`
     }
   }
 `;
+export const CREATE_LGA_DIRECTOR_MUTATION = gql`
+  mutation CreateLGADirector(
+    $username: String!
+    $password: String!
+    $email: String
+    $full_name: String!
+    $lga: String!
+  ) {
+    createLGADirector(
+      username: $username
+      password: $password
+      email: $email
+      full_name: $full_name
+      lga: $lga
+    ) {
+      id
+      username
+      full_name
+      email
+      role
+      state
+      lga
+    }
+  }
+`;
+export const CREATE_WARD_DIRECTOR_MUTATION = gql`
+  mutation CreateWardDirector(
+    $username: String!
+    $password: String!
+    $email: String
+    $full_name: String!
+    $ward: String!
+  ) {
+    createWardDirector(
+      username: $username
+      password: $password
+      email: $email
+      full_name: $full_name
+      ward: $ward
+    ) {
+      id
+      username
+      full_name
+      email
+      role
+      state
+      lga
+      ward
+    }
+  }
+`;
+export const CREATE_POLLING_UNIT_OFFICER_MUTATION = gql`
+  mutation CreatePollingUnitOfficer(
+    $username: String!
+    $password: String!
+    $email: String
+    $full_name: String!
+    $pollingUnit: String!
+  ) {
+    createPollingUnitOfficer(
+      username: $username
+      password: $password
+      email: $email
+      full_name: $full_name
+      pollingUnit: $pollingUnit
+    ) {
+      id
+      username
+      full_name
+      email
+      role
+      state
+      lga
+      ward
+      pollingUnit
+    }
+  }
+`;
+
+
+

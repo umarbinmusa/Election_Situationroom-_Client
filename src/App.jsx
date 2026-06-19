@@ -11,6 +11,9 @@ import PollingUnits from "./pages/PollingUnits";
 import ElectionResults from "./pages/ElectionResults";
 import ElectionSummaryDashboard from "./Pages/ElectionSummaryDashboard";
 import CreateICTDirector from "./Pages/CreateICTDirector";
+import CreateLGADirector from "./Pages/CreateLGADirector";
+import CreateWardDirector from "./Pages/CreateWardDirector";
+import CreatePollingUnitOfficer from "./pages/CreatePollingUnitOfficer";
 export default function App() {
   return (
     <Routes>
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/summary" element={<ElectionSummaryDashboard />} />
         <Route path="/create-director" element={<CreateICTDirector />} />
+        <Route path="/create-lga" element={<CreateLGADirector />} />
+          <Route path="/create-ward" element={<CreateWardDirector />} />
+          <Route path="/create-pollinunit" element={<CreatePollingUnitOfficer />} />
         {/* Incident Logs Dashboard */}
         <Route path="/incidents" element={<IncidentDashboard />} />
         

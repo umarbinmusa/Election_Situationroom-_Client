@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import { useMutation } from '@apollo/client/react';
+import React, { useState } from "react";
+import { useMutation } from "@apollo/client/react";
 import { gql } from '@apollo/client';
-import { Loader2, CheckCircle2, AlertCircle, UserCheck, MapPin } from 'lucide-react';
+import {
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  UserCheck,
+  MapPin,
+} from "lucide-react";
 
-// 1. GraphQL Mutation perfectly tracking your explicit schema typeDefs
 const CREATE_ICT_DIRECTOR_MUTATION = gql`
   mutation CreateICTDirector(
     $username: String!
     $password: String!
     $email: String
-    $full_name: String!     # Mandatory (!) as defined in your Mutation inputs
-    $state: String!        # Mandatory (!) as defined in your Mutation inputs
+    $full_name: String!
+    $state: String!
   ) {
     createICTDirector(
       username: $username
@@ -21,40 +26,47 @@ const CREATE_ICT_DIRECTOR_MUTATION = gql`
     ) {
       id
       username
-      email
       full_name
-      state                # Now safe to query because it exists on your User model!
+      email
       role
+      state
     }
   }
 `;
 
 export default function CreateICTDirector() {
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    email: '',
-    full_name: '',
-    state: '',
+    username: "",
+    password: "",
+    full_name: "",
+    email: "",
+    state: "",
   });
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // 2. Apollo v4 Hook Implementation for React 19 frameworks
   const [createDirector, { loading }] = useMutation(CREATE_ICT_DIRECTOR_MUTATION, {
     onCompleted: (data) => {
-      const director = data.createICTDirector;
+      console.log("Response data received:", data);
+
       setSuccessMessage(
-        `Success! ${director.full_name} has been deployed as the ICT Director for ${director.state || 'assigned state'}.`
+        `ICT Director ${data.createICTDirector.full_name} created successfully for ${data.createICTDirector.state}`
       );
-      setErrorMessage(null);
-      // Clear form inputs
-      setFormData({ username: '', password: '', email: '', full_name: '', state: '' });
+      setErrorMessage("");
+
+      setFormData({
+        username: "",
+        password: "",
+        full_name: "",
+        email: "",
+        state: "",
+      });
     },
     onError: (error) => {
+      console.error("Mutation Error intercepted:", error);
+      setSuccessMessage("");
       setErrorMessage(error.message);
-      setSuccessMessage(null);
     },
   });
 
@@ -68,127 +80,138 @@ export default function CreateICTDirector() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side quick-validation block
-    if (!formData.username || !formData.password || !formData.full_name || !formData.state) {
-      setErrorMessage('Username, Password, Full Name, and Assigned State are required fields.');
+    const username = formData.username.trim();
+    const password = formData.password.trim();
+    const full_name = formData.full_name.trim();
+    const state = formData.state.trim().toUpperCase();
+    const email = formData.email.trim() || null;
+
+    if (!username || !password || !full_name || !state) {
+      setErrorMessage("Username, Password, Full Name and State are required.");
       return;
     }
 
+    console.log("Submitting variables payload:", {
+      username,
+      password,
+      full_name,
+      state,
+      email,
+    });
+
     await createDirector({
       variables: {
-        username: formData.username,
-        password: formData.password,
-        full_name: formData.full_name,
-        state: formData.state,
-        email: formData.email || null, // Clean conversion to DB null types
+        username,
+        password,
+        full_name,
+        state,
+        email,
       },
     });
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Provision ICT Director</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Deploy high-level command nodes with administrative regional system privileges.
-        </p>
-      </div>
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="bg-white rounded-2xl shadow border p-6">
+        <h1 className="text-2xl font-bold mb-2">Create ICT Director</h1>
+        <p className="text-gray-500 mb-6">Create a State ICT Director account.</p>
 
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="space-y-5">
-          
-          {/* Status Message Alerts */}
-          {errorMessage && (
-            <div className="p-4 text-sm text-red-700 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3" role="alert">
-              <AlertCircle size={18} className="shrink-0 mt-0.5 text-red-500" />
-              <div>
-                <span className="font-bold">System Refusal:</span> {errorMessage}
-              </div>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="p-4 text-sm text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start gap-3" role="alert">
-              <CheckCircle2 size={18} className="shrink-0 mt-0.5 text-emerald-600" />
-              <div>
-                <span className="font-bold">Execution Confirmed:</span> {successMessage}
-              </div>
-            </div>
-          )}
-
-          {/* Form Rows */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Full Legal Name *</label>
-              <input
-                name="full_name" type="text" required value={formData.full_name} onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all font-medium text-gray-800"
-                placeholder="e.g. Umar Musa"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Official Email Address</label>
-              <input
-                name="email" type="email" value={formData.email} onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all font-medium text-gray-800"
-                placeholder="director@situationroom.gov"
-              />
-            </div>
+        {errorMessage && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
+            <AlertCircle size={18} />
+            {errorMessage}
           </div>
+        )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Account Username *</label>
-              <input
-                name="username" type="text" required value={formData.username} onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all font-semibold text-gray-900"
-                placeholder="umar_director"
-              />
-            </div>
+        {successMessage && (
+          <div className="mb-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-green-700">
+            <CheckCircle2 size={18} />
+            {successMessage}
+          </div>
+        )}
 
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Secure Password Access *</label>
-              <input
-                name="password" type="password" required value={formData.password} onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all font-mono text-gray-900"
-                placeholder="••••••••••••"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Full Name</label>
+            <input
+              type="text"
+              name="full_name"
+              value={formData.full_name}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="Umar Musa"
+            />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Assigned State Jurisdiction *</label>
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="director@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Username</label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="state_director"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-4 py-2"
+              placeholder="********"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">State</label>
             <div className="relative">
-              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <MapPin size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
-                name="state" type="text" required value={formData.state} onChange={handleChange}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm uppercase font-bold tracking-wide focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 outline-none transition-all text-gray-800"
-                placeholder="e.g. BAUCHI, RIVERS, LAGOS"
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                className="w-full border rounded-lg pl-10 pr-4 py-2"
+                placeholder="KADUNA"
               />
             </div>
           </div>
 
-          <div className="p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl flex items-center justify-between text-xs font-medium text-indigo-800">
-            <span className="flex items-center gap-2">
-              <UserCheck size={15} className="text-indigo-600" />
-              System Assigned Permission:
-            </span>
-            <span className="bg-indigo-600 text-white font-mono font-bold px-2 py-0.5 rounded text-[10px]">
+          <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 flex justify-between items-center">
+            <div className="flex items-center gap-2 text-indigo-700">
+              <UserCheck size={16} />
+              Assigned Role
+            </div>
+            <span className="bg-indigo-600 text-white px-3 py-1 rounded text-xs font-semibold">
               ICT_DIRECTOR
             </span>
           </div>
 
-          <div className="pt-4 border-t border-gray-50 flex justify-end">
-            <button
-              type="submit" disabled={loading}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl shadow-md shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-50 transition-all duration-150"
-            >
-              {loading && <Loader2 size={14} className="animate-spin" />}
-              {loading ? 'Authorizing Node Profile...' : 'Confirm and Deploy Director'}
-            </button>
-          </div>
-
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-indigo-600 text-white rounded-lg py-3 font-semibold hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 size={18} className="animate-spin" />}
+            {loading ? "Creating Director..." : "Create ICT Director"}
+          </button>
         </form>
       </div>
     </div>
