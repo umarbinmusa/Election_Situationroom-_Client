@@ -80,18 +80,30 @@ export const CREATE_POLLING_UNIT = gql`
     }
   }
 `;
+
 export const SUBMIT_RESULT = gql`
-  mutation SubmitResult($pollingUnit: String!, $candidate: String!, $votes: Int!) {
-    submitResult(pollingUnit: $pollingUnit, candidate: $candidate, votes: $votes) {
+  mutation SubmitResult(
+    $pollingUnit: String!
+    $electionType: ElectionType!
+    $candidate: Candidate!
+    $votes: Int!
+  ) {
+    submitResult(
+      pollingUnit: $pollingUnit
+      electionType: $electionType
+      candidate: $candidate
+      votes: $votes
+    ) {
       id
       pollingUnit
+      electionType
       candidate
       votes
       submittedBy {
         id
+        full_name
         username
         email
-        full_name
         role
       }
     }

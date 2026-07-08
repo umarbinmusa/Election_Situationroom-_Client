@@ -66,8 +66,9 @@ export const GET_RESULTS = gql`
     }
   }
 `;
+
 export const GET_ELECTION_SUMMARY = gql`
-  query GetElectionSummary {
+  query ElectionSummary {
     electionSummary {
       winner
       totalVotes

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { Search, Loader2, AlertCircle, RefreshCw, User, FileText, Vote, Plus, X, CheckCircle2 } from "lucide-react";
-import {SUBMIT_RESULT} from "../graphql/mutations";
-import {GET_RESULTS} from "../graphql/queries";
+import { SUBMIT_RESULT } from "../graphql/mutations";
+import { GET_RESULTS } from "../graphql/queries";
 
 export default function ElectionResults() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -10,7 +10,12 @@ export default function ElectionResults() {
   
   // Modal layout structural toggles & form properties
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ pollingUnit: "", candidate: "", votes: "" });
+  const [formData, setFormData] = useState({
+    pollingUnit: "",
+    electionType: "",
+    candidate: "",
+    votes: "",
+  });
 
   // Query Data Stream
   const { data, loading, error, refetch } = useQuery(GET_RESULTS, {
@@ -20,7 +25,7 @@ export default function ElectionResults() {
   // Mutation Data Execution Hook with Automated Cache Updating properties
   const [submitResult, { loading: submitting }] = useMutation(SUBMIT_RESULT, {
     update(cache, { data: { submitResult } }) {
-      const existingData = cache.readQuery({ query: GET_RESULTS });
+      const existingData: any = cache.readQuery({ query: GET_RESULTS });
       if (existingData && submitResult) {
         cache.writeQuery({
           query: GET_RESULTS,
@@ -32,7 +37,12 @@ export default function ElectionResults() {
     },
     onCompleted: () => {
       setIsModalOpen(false);
-      setFormData({ pollingUnit: "", candidate: "", votes: "" });
+      setFormData({
+        pollingUnit: "",
+        electionType: "",
+        candidate: "",
+        votes: "",
+      });
       triggerToastNotification("Election return sheets logged and recorded!");
     },
     onError: (err) => {
@@ -49,17 +59,19 @@ export default function ElectionResults() {
     e.preventDefault();
     const voteInt = parseInt(formData.votes, 10);
     
-    if (!formData.pollingUnit || !formData.candidate || isNaN(voteInt)) {
-      alert("Please ensure all metrics structural inputs are typed accurately.");
+    // Core Form Validation Check
+    if (!formData.pollingUnit || !formData.electionType || !formData.candidate || isNaN(voteInt)) {
+      alert("Please complete all fields with accurate values.");
       return;
     }
 
     await submitResult({
       variables: {
-        pollingUnit: formData.pollingUnit,
-        candidate: formData.candidate,
-        votes: voteInt
-      }
+        pollingUnit: formData.pollingUnit.trim().toUpperCase(),
+        electionType: formData.electionType.trim(), // Explicitly aligned to match standard GraphQL Enum schemas
+        candidate: formData.candidate.trim(),
+        votes: voteInt,
+      },
     });
   };
 
@@ -229,16 +241,44 @@ export default function ElectionResults() {
                   className="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-sm uppercase font-semibold tracking-wider focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition"
                 />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Candidate / Party Name</label>
-                <input
-                  type="text" required placeholder="e.g. APC, PDP, LP, NNPP"
-                  value={formData.candidate} onChange={(e) => setFormData({ ...formData, candidate: e.target.value })}
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Election Type</label>
+                <select
+                  required
+                  value={formData.electionType}
+                  onChange={(e) => setFormData({ ...formData, electionType: e.target.value })}
                   className="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition"
-                />
+                >
+                  <option value="">Select Election Type</option>
+                  <option value="PRESIDENTIAL">Presidential</option>
+                  <option value="GOVERNORSHIP">Governorship</option>
+                  <option value="SENATORIAL">Senatorial</option>
+                  <option value="HOUSE_OF_REPS">House of Representatives</option>
+                  <option value="STATE_ASSEMBLY">State Assembly</option>
+                </select>
               </div>
 
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Political Party</label>
+                <select
+                  required
+                  value={formData.candidate}
+                  onChange={(e) => setFormData({ ...formData, candidate: e.target.value })}
+                  className="w-full px-3.5 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition"
+                >
+                  <option value="">Select Party</option>
+                  <option value="APC">APC</option>
+                  <option value="PDP">PDP</option>
+                  <option value="LP">LP</option>
+                  <option value="NNPP">NNPP</option>
+                  <option value="SDP">SDP</option>
+                  <option value="ADC">ADC</option>
+                  <option value="YPP">YPP</option>
+                  <option value="AAC">AAC</option>
+                  <option value="APGA">APGA</option>
+                </select>
+              </div>
+              
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Total Votes Logged</label>
                 <input
