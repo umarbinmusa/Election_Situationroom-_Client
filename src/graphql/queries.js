@@ -54,6 +54,7 @@ export const GET_RESULTS = gql`
     getResults {
       id
       pollingUnit
+      electionType
       candidate
       votes
       submittedBy {
@@ -66,7 +67,6 @@ export const GET_RESULTS = gql`
     }
   }
 `;
-
 export const GET_ELECTION_SUMMARY = gql`
   query ElectionSummary {
     electionSummary {

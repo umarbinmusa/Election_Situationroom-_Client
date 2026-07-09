@@ -178,41 +178,67 @@ export default function ElectionResults() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50/70 border-b border-gray-100 text-xs font-bold uppercase tracking-wider text-gray-400">
-                  <th className="py-4 px-6">Polling Station Node</th>
-                  <th className="py-4 px-6">Candidate / Flagbearer</th>
-                  <th className="py-4 px-6">Total Votes Counted</th>
-                  <th className="py-4 px-6">Submitted By</th>
-                </tr>
+  <th className="py-4 px-6">Polling Station</th>
+  <th className="py-4 px-6">Election Type</th>
+  <th className="py-4 px-6">Political Party</th>
+  <th className="py-4 px-6">Votes</th>
+  <th className="py-4 px-6">Submitted By</th>
+</tr>
               </thead>
               <tbody className="divide-y divide-gray-50 text-sm text-gray-600">
-                {filteredResults.map((result) => (
-                  <tr key={result.id} className="hover:bg-gray-50/40 transition duration-150">
-                    <td className="py-4 px-6 font-semibold text-gray-900 uppercase">{result.pollingUnit || "—"}</td>
-                    <td className="py-4 px-6 font-medium text-gray-700 capitalize">{result.candidate || "—"}</td>
-                    <td className="py-4 px-6">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-indigo-100/60 bg-indigo-50/40 text-xs font-bold text-indigo-700 font-mono">
-                        <Vote size={14} />
-                        {result.votes?.toLocaleString() ?? 0}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      {result.submittedBy ? (
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5 font-semibold text-gray-800">
-                            <User size={14} className="text-gray-400" />
-                            {result.submittedBy.full_name || result.submittedBy.username}
-                          </div>
-                          <div className="text-xs text-gray-400 pl-5">
-                            {result.submittedBy.email} • <span className="text-indigo-500 font-bold text-[10px] tracking-wider uppercase">{result.submittedBy.role}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 italic text-xs">Unknown Submitter</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+  {filteredResults.map((result) => (
+    <tr
+      key={result.id}
+      className="hover:bg-gray-50/40 transition duration-150"
+    >
+      <td className="py-4 px-6 font-semibold text-gray-900 uppercase">
+        {result.pollingUnit || "—"}
+      </td>
+
+      <td className="py-4 px-6">
+        <span className="inline-flex px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+          {result.electionType?.replaceAll("_", " ") || "—"}
+        </span>
+      </td>
+
+      <td className="py-4 px-6">
+        <span className="inline-flex px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold">
+          {result.candidate || "—"}
+        </span>
+      </td>
+
+      <td className="py-4 px-6">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-indigo-100 bg-indigo-50 text-xs font-bold text-indigo-700 font-mono">
+          <Vote size={14} />
+          {result.votes?.toLocaleString() ?? 0}
+        </div>
+      </td>
+
+      <td className="py-4 px-6">
+        {result.submittedBy ? (
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5 font-semibold text-gray-800">
+              <User size={14} className="text-gray-400" />
+              {result.submittedBy.full_name ||
+                result.submittedBy.username}
+            </div>
+
+            <div className="text-xs text-gray-400 pl-5">
+              {result.submittedBy.email} •{" "}
+              <span className="text-indigo-500 font-bold text-[10px] tracking-wider uppercase">
+                {result.submittedBy.role}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <span className="text-gray-400 italic text-xs">
+            Unknown Submitter
+          </span>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
           <div className="p-4 bg-gray-50/50 border-t border-gray-100 text-xs font-medium text-gray-400 text-right">
